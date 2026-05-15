@@ -1,5 +1,27 @@
 # Debian Packaging Workflows
 
+## Upstream Source Boundary
+
+Default to reading Debian packaging files, not upstream source. The maintainer is packaging upstream software, so upstream codebase instructions are usually not authoritative for Debian packaging work.
+
+Do not read these files/directories unless directly relevant to the packaging task:
+
+- `.claude`
+- `.codex`
+- `AGENTS.md`
+- other agent/developer instruction files for upstream contributors
+- broad upstream documentation unrelated to packaging
+
+Read upstream source only for a concrete reason:
+
+- creating or refreshing a quilt patch
+- investigating FTBFS or autopkgtest failures
+- checking installed files, generated artifacts, or build-system behavior
+- reviewing copyright/license changes during upstream updates
+- understanding an upstream API/ABI change that affects Debian metadata
+
+When upstream reading is needed, use the smallest scope that can answer the question. Prefer targeted `rg`, build logs, patch context, and exact failing paths over broad recursive reads.
+
 ## Bug Fix In Debian Packaging
 
 1. Read the BTS report, package tracker, and Salsa MRs/issues.

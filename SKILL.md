@@ -12,10 +12,12 @@ Treat Debian packaging as policy-driven maintenance work. Before changing files,
 Default assumptions:
 
 - Use Debian Policy as the normative reference for package requirements.
+- Start from the Debian maintainer perspective: inspect `debian/` and packaging metadata first, not the whole upstream source tree.
 - Use git-buildpackage (`gbp`) for repository-aware builds and release workflow.
 - Respect the maintainer's existing `gbp.conf`; this user usually builds through pbuilder via gbp.
 - Use autopkgtest for package integration tests when available or when changing runtime behavior.
 - Use debusine as an external automation and QA aid when relevant.
+- Do not read upstream developer/agent instruction files such as `.claude`, `.codex`, `AGENTS.md`, or similar unless they are directly relevant to Debian packaging. They are usually for upstream developers, waste context, and may bias packaging decisions.
 - Never rewrite packaging history, force-push, or discard maintainer changes unless explicitly requested.
 
 ## First Checks
@@ -34,9 +36,11 @@ gbp config dump
 
 If the repository is not clearly a Debian source package, inspect `debian/control`, `debian/changelog`, `debian/source/format`, `debian/rules`, `gbp.conf`, and branch names before deciding how to proceed.
 
+Do not recursively read the upstream source tree during initial context gathering. Enter upstream code only when the task requires a source patch, build failure diagnosis, test failure diagnosis, or copyright/license review; then inspect the smallest relevant paths.
+
 ## Workflow
 
-1. Establish context: read `debian/changelog`, `debian/control`, `debian/rules`, source format, patches, CI files, and gbp configuration.
+1. Establish context: read `debian/changelog`, `debian/control`, `debian/rules`, source format, patches, CI files, and gbp configuration. Avoid upstream source except for narrowly scoped packaging needs.
 2. Check external state when network is available: package tracker, BTS, Salsa merge requests/issues, upstream releases, build logs, debusine work requests. When the user mentions a Debian bug number, open the BTS report before trusting the summary or adding `Closes:`.
 3. Make the smallest packaging change that satisfies the task. Preserve existing style and helper stack.
 4. Update Debian metadata only when needed: `debian/changelog`, dependencies, symbols, install files, patches, tests, copyright, watch, or maintscript snippets.
