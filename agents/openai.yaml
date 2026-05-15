@@ -1,0 +1,7 @@
+interface:
+  display_name: "Debian Package Maintainer"
+  short_description: "Debian packaging maintenance workflows"
+  default_prompt: "Use $debian-pkg-skill to inspect and maintain this Debian package repository."
+
+policy:
+  allow_implicit_invocation: true
