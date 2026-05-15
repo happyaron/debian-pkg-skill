@@ -44,6 +44,23 @@ https://bugs.debian.org/src:<source-package>
 
 For changelog closures, use `Closes: #NNNNNN`. For complicated bug state, prefer explaining the intended BTS control action rather than pretending it happened.
 
+When the user mentions a bug number, verify it in BTS before changing code or changelog:
+
+```text
+https://bugs.debian.org/<bug-number>
+```
+
+Check:
+
+- package/source package matches the repository
+- bug is not already closed in the target version
+- severity/tags/merged bugs/forwarded upstream state
+- found and fixed versions
+- attached patches, PO files, logs, or maintainer comments
+- whether `Closes: #NNNNNN` is appropriate for this upload
+
+If the user's summary conflicts with BTS, report the mismatch and avoid adding a false closure.
+
 Common BTS concepts:
 
 - severity: wishlist, minor, normal, important, serious, grave, critical
@@ -79,6 +96,20 @@ When working with debusine:
 - Preserve links and IDs in summaries so the maintainer can audit the result.
 
 If debusine CLI/API credentials are not configured, use the web links and ask before attempting authenticated actions.
+
+Debusine upload safety:
+
+- Debusine may accept unsigned or intermediate work-in-progress source uploads for CI/QA assistance; treat this as different from uploading to the Debian archive.
+- Use explicit upload commands only, for example `dput debusine.debian.net <source.changes>`.
+- Never run bare `dput`, bare `dupload`, or version-probing commands that may default to an archive profile and infer the latest `.changes` file.
+- Before uploading, print or inspect the `.changes` file enough to verify source, version, distribution, changed-by, and file list.
+- Preserve the created artifact/work-request URLs in the final summary.
+
+Archive upload safety:
+
+- Do not upload to ftp-master or any archive profile unless the user explicitly asks for that exact target.
+- Do not sign, upload, or retry archive uploads after a GPG/profile error without explicit confirmation.
+- Prefer asking when `dput` output indicates it selected a target profile different from the one requested.
 
 ## buildd And Debian CI
 

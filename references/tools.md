@@ -12,6 +12,7 @@ Primary sources:
 - sbuild: https://manpages.debian.org/unstable/sbuild/sbuild.1.en.html
 - uscan/devscripts: https://manpages.debian.org/unstable/devscripts/uscan.1.en.html
 - dch/devscripts: https://manpages.debian.org/unstable/devscripts/dch.1.en.html
+- dput: https://manpages.debian.org/unstable/dput/dput.1.en.html
 - quilt: https://manpages.debian.org/unstable/quilt/quilt.1.en.html
 
 ## gbp
@@ -31,9 +32,10 @@ gbp buildpackage --git-pbuilder
 gbp buildpackage --git-builder=sbuild
 gbp buildpackage --git-tag-only
 gbp buildpackage --git-ignore-new
+gbp buildpackage --git-ignore-new --git-branch=<branch>
 ```
 
-Avoid `--git-ignore-new` for upload-prep unless the user explicitly wants to include uncommitted changes in a local test build. It can hide unreproducible state.
+Use `--git-ignore-new` deliberately for this user's pre-upload test builds when `debian/changelog` has been finalized to `unstable` but the release commit is intentionally delayed until after upload. Do not use it to hide uncommitted source, patch, or packaging logic changes.
 
 ## User Default: gbp With pbuilder
 
@@ -55,7 +57,27 @@ For this user, the most common local build command is:
 gbp buildpackage --git-pbuilder --git-arch=amd64 --git-dist=sid
 ```
 
-Prefer this exact command for amd64 sid test builds unless the package or task requires another architecture or suite. Treat `sid` and `unstable` as equivalent in Debian suite naming, but preserve the user's command spelling when documenting or rerunning.
+Prefer this command for clean amd64 sid test builds unless the package or task requires another architecture or suite. If only the finalized release changelog is uncommitted, use:
+
+```bash
+gbp buildpackage --git-pbuilder --git-arch=amd64 --git-dist=sid --git-ignore-new
+```
+
+Treat `sid` and `unstable` as equivalent in Debian suite naming, but preserve the user's command spelling when documenting or rerunning.
+
+For long builds, tee the complete output into a timestamped log under `~/Workspace/build-logs` so the user can monitor it and later failure analysis has the full context:
+
+```bash
+pkg=$(dpkg-parsechangelog --show-field Source)
+ver=$(dpkg-parsechangelog --show-field Version)
+arch=amd64
+dist=sid
+ts=$(date +%Y%m%d-%H%M%S)
+log="$HOME/Workspace/build-logs/$pkg/$pkg-$ver-$arch-$dist-$ts.log"
+mkdir -p "$(dirname "$log")"
+set -o pipefail
+gbp buildpackage --git-pbuilder --git-arch="$arch" --git-dist="$dist" --git-ignore-new 2>&1 | tee "$log"
+```
 
 If a pbuilder chroot is missing or stale, ask before creating/updating it because that may require root, network, and writes outside the workspace.
 
@@ -208,3 +230,14 @@ mk-build-deps
 ```
 
 Use helper tools to reduce formatting mistakes, but review the diff because they can reorder or rewrite packaging files extensively.
+
+## Upload Helpers
+
+Treat upload helpers as potentially dangerous. They may infer a profile and a recent `.changes` file.
+
+Rules:
+
+- Never run bare `dput` or bare `dupload`.
+- Never run `dput --version` or similar probes if the local implementation might treat missing changes files as an upload prompt.
+- Always specify the target profile and the exact `.changes` file, for example `dput debusine.debian.net zfs-linux_2.4.2-2_source.changes`.
+- Use debusine for intermediate or unsigned QA uploads when configured; do not equate it with Debian archive upload.

@@ -37,7 +37,7 @@ If the repository is not clearly a Debian source package, inspect `debian/contro
 ## Workflow
 
 1. Establish context: read `debian/changelog`, `debian/control`, `debian/rules`, source format, patches, CI files, and gbp configuration.
-2. Check external state when network is available: package tracker, BTS, Salsa merge requests/issues, upstream releases, build logs, debusine work requests.
+2. Check external state when network is available: package tracker, BTS, Salsa merge requests/issues, upstream releases, build logs, debusine work requests. When the user mentions a Debian bug number, open the BTS report before trusting the summary or adding `Closes:`.
 3. Make the smallest packaging change that satisfies the task. Preserve existing style and helper stack.
 4. Update Debian metadata only when needed: `debian/changelog`, dependencies, symbols, install files, patches, tests, copyright, watch, or maintscript snippets.
 5. Validate locally with the lightest useful checks first, then full build/tests when the change warrants it.

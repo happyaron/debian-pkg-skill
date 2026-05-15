@@ -82,6 +82,8 @@ Suggested commit granularity:
 - one commit for symbols/install/rules metadata updates
 - one release commit for final `gbp dch`/upload changelog state when repository practice uses it
 
+For this user, commit non-changelog changes promptly so `gbp dch` has useful input, but usually delay the final release changelog commit until after the upload succeeds. A pre-upload build may therefore have exactly one uncommitted file, `debian/changelog`, with distribution already set to `unstable`; in that case build with `--git-ignore-new` rather than committing the release entry prematurely.
+
 ## NMU
 
 Non-maintainer uploads require extra care.
@@ -125,10 +127,18 @@ Run or explicitly defer:
 git status --short
 dpkg-parsechangelog
 gbp config dump
-gbp buildpackage --git-pbuilder --git-arch=amd64 --git-dist=sid
+gbp buildpackage --git-pbuilder --git-arch=amd64 --git-dist=sid --git-ignore-new
 lintian ../*.changes
 autopkgtest ../*.dsc -- <backend>
 ```
+
+For long-running build commands, write logs to:
+
+```text
+~/Workspace/build-logs/<source>/<source>-<version>-<arch>-<dist>-<YYYYmmdd-HHMMSS>.log
+```
+
+Use `set -o pipefail` when piping through `tee` so build failures are not hidden by the pipeline.
 
 Check:
 
