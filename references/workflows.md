@@ -1,26 +1,6 @@
 # Debian Packaging Workflows
 
-## Upstream Source Boundary
-
-Default to reading Debian packaging files, not upstream source. The maintainer is packaging upstream software, so upstream codebase instructions are usually not authoritative for Debian packaging work.
-
-Do not read these files/directories unless directly relevant to the packaging task:
-
-- `.claude`
-- `.codex`
-- `AGENTS.md`
-- other agent/developer instruction files for upstream contributors
-- broad upstream documentation unrelated to packaging
-
-Read upstream source only for a concrete reason:
-
-- creating or refreshing a quilt patch
-- investigating FTBFS or autopkgtest failures
-- checking installed files, generated artifacts, or build-system behavior
-- reviewing copyright/license changes during upstream updates
-- understanding an upstream API/ABI change that affects Debian metadata
-
-When upstream reading is needed, use the smallest scope that can answer the question. Prefer targeted `rg`, build logs, patch context, and exact failing paths over broad recursive reads.
+The upstream-source boundary (when to read upstream code vs. just `debian/`, and which upstream agent-instruction files to avoid) is part of the operating model in `SKILL.md`. Re-read it before any workflow that might pull you into the upstream tree.
 
 ## Bug Fix In Debian Packaging
 
@@ -69,7 +49,8 @@ quilt refresh
 quilt pop -a
 gbp dch
 editor debian/changelog
-gbp buildpackage --git-pbuilder --git-arch=amd64 --git-dist=sid
+dpkg-buildpackage -S -us -uc
+mypbuilder sid amd64 build ../<source>_<version>.dsc   # see LOCAL.md
 ```
 
 Drop `--pristine-tar` only when the repository does not use pristine-tar.
@@ -104,7 +85,7 @@ Suggested commit granularity:
 - one commit for symbols/install/rules metadata updates
 - one release commit for final `gbp dch`/upload changelog state when repository practice uses it
 
-For this user, commit non-changelog changes promptly so `gbp dch` has useful input, but usually delay the final release changelog commit until after the upload succeeds. A pre-upload build may therefore have exactly one uncommitted file, `debian/changelog`, with distribution already set to `unstable`; in that case build with `--git-ignore-new` rather than committing the release entry prematurely.
+This maintainer's commit-timing rule (commit non-changelog changes promptly; usually delay the release changelog commit until after upload) is recorded in `LOCAL.md`.
 
 ## NMU
 
@@ -149,18 +130,13 @@ Run or explicitly defer:
 git status --short
 dpkg-parsechangelog
 gbp config dump
-gbp buildpackage --git-pbuilder --git-arch=amd64 --git-dist=sid --git-ignore-new
-lintian ../*.changes
-autopkgtest ../*.dsc -- <backend>
+dpkg-buildpackage -S -us -uc
+mypbuilder sid amd64 build ../<source>_<version>.dsc       # builder per LOCAL.md
+lintian ~/pbuilder/result/sid-amd64/<source>_<version>_<arch>.changes
+mypbuilder sid amd64 autopkgtest ../<source>_<version>.dsc # autopkgtest per LOCAL.md
 ```
 
-For long-running build commands, write logs to:
-
-```text
-~/Workspace/build-logs/<source>/<source>-<version>-<arch>-<dist>-<YYYYmmdd-HHMMSS>.log
-```
-
-Use `set -o pipefail` when piping through `tee` so build failures are not hidden by the pipeline.
+`mypbuilder` writes its own log to `~/pbuilder/logs/<DIST>-<ARCH>/`; do not add an external `tee` unless a copy is needed elsewhere.
 
 Check:
 

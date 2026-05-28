@@ -85,6 +85,8 @@ autopkgtest ../*.dsc -- qemu <image>
 
 Use `null` only for quick smoke tests because it is not isolated like schroot/qemu. If tests need network, root, isolation-machine, or installed built binaries, check `Restrictions` and the chosen backend.
 
+This maintainer's standard autopkgtest invocation drives `mypbuilder` rather than `autopkgtest` directly (`mypbuilder <dist> <arch> autopkgtest ../<source>.dsc`); see `LOCAL.md`.
+
 When adding tests, keep them deterministic and archive-friendly. Avoid external network access unless explicitly allowed by the test restrictions and accepted by Debian CI practice.
 
 ## piuparts

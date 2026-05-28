@@ -18,6 +18,8 @@ remain authoritative; adapt the defaults to your own packages and habits.
 - `SKILL.md` — entry point. Frontmatter conforms to the Claude Code / Codex
   Skills format (`name`, `description`). Body describes the operating model,
   first checks, workflow, and a reference map.
+- `LOCAL.md` — maintainer-specific defaults (builder, arch/suite, upload
+  targets). The one file a fork is expected to edit.
 - `references/` — focused notes loaded on demand:
   - `policy.md` — Debian Policy, changelog/control/copyright/patch rules.
   - `tools.md` — gbp, pbuilder, sbuild, devscripts, uscan, quilt, pristine-tar.
@@ -76,13 +78,11 @@ for all harnesses.
 
 ## Customizing
 
-`SKILL.md` encodes defaults that may not match every maintainer:
+Maintainer-specific defaults — builder choice, default arch/suite, log
+location, commit-timing rules, and preferred upload targets — live in the
+top-level `LOCAL.md`. Fork that file first; `SKILL.md` and the `references/`
+are intended to be team-neutral and should rarely need editing.
 
-- gbp-through-pbuilder as the preferred local builder
-- amd64/sid as default arch/suite
-- timestamped logs under `~/Workspace/build-logs/`
-- the upload-safety rules around `dput`, `debusine.debian.net`, and signed vs.
-  unsigned changes files
-
-Edit `SKILL.md` and the `references/` files in place to match your team's
-conventions; keep the reference map small and the rules concrete.
+Generic policy and agent-safety rules (e.g. how to invoke `dput`, when to
+forward patches upstream, when to refuse a chroot operation) stay in their
+topical reference and apply to every fork.

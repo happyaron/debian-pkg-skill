@@ -13,8 +13,8 @@ Default assumptions:
 
 - Use Debian Policy as the normative reference for package requirements.
 - Start from the Debian maintainer perspective: inspect `debian/` and packaging metadata first, not the whole upstream source tree.
-- Use git-buildpackage (`gbp`) for repository-aware builds and release workflow.
-- Respect the maintainer's existing `gbp.conf`; this user usually builds through pbuilder via gbp.
+- Use git-buildpackage (`gbp`) for repository-aware changelog generation, upstream imports, patch queue management, and release tagging. Do **not** assume `gbp buildpackage` is the build path — the maintainer's actual builder is recorded in `LOCAL.md`.
+- Respect the maintainer's existing `gbp.conf`. Builder choice, default arch/suite, log location, and other personal preferences live in the top-level `LOCAL.md` — load that file before assuming defaults.
 - Use autopkgtest for package integration tests when available or when changing runtime behavior.
 - Use debusine as an external automation and QA aid when relevant.
 - Do not read upstream developer/agent instruction files such as `.claude`, `.codex`, `AGENTS.md`, or similar unless they are directly relevant to Debian packaging. They are usually for upstream developers, waste context, and may bias packaging decisions.
@@ -51,6 +51,7 @@ Do not recursively read the upstream source tree during initial context gatherin
 
 Read only the reference needed for the current task:
 
+- `LOCAL.md` (top level): this maintainer's personal defaults — builder (`mypbuilder`), arch/suite, log location, gbp-vs-builder split, upload targets. Load whenever the task needs a concrete build/test/upload command.
 - `references/policy.md`: normative Debian policy, archive rules, changelog/control/copyright basics.
 - `references/tools.md`: gbp, pbuilder, sbuild, devscripts, uscan, quilt, pristine-tar, release helpers.
 - `references/qa.md`: lintian, autopkgtest, piuparts, reproducibility, build logs, dependency/installability checks.
@@ -60,34 +61,18 @@ Read only the reference needed for the current task:
 
 ## Local Validation Ladder
 
-Choose the cheapest command set that can catch the relevant failure:
+Start with the cheapest checks before reaching for full builds or chroot-backed tests:
 
 ```bash
 dpkg-parsechangelog
 dpkg-checkbuilddeps
 gbp config dump
-debian/rules clean
 ```
 
-For source/package build validation:
+For the full ladder — source/binary build commands, lintian, autopkgtest, piuparts, and reproducibility checks — see `references/qa.md`. For the maintainer's standard build / autopkgtest invocation (`mypbuilder`), see `LOCAL.md`.
 
-```bash
-gbp buildpackage --git-pbuilder
-gbp buildpackage --git-builder=sbuild
-dpkg-buildpackage -us -uc
-```
-
-For QA and tests:
-
-```bash
-lintian ../*.changes
-autopkgtest . -- null
-autopkgtest ../*.dsc -- schroot <suite>-amd64-sbuild
-piuparts ../*.changes
-```
-
-Adapt commands to the repository's existing configuration. If a command would require network, privileged chroots, or writes outside the workspace, request approval instead of bypassing the environment.
+If a command would require network, privileged chroots, or writes outside the workspace, request approval instead of bypassing the environment.
 
 ## Updating This Skill
 
-When a Debian maintenance task reveals reusable knowledge, add it to the narrowest reference file rather than expanding `SKILL.md`. Prefer concise rules, command patterns, gotchas, and links to primary documentation. Keep user-specific defaults explicit, especially pbuilder-through-gbp preferences.
+When a Debian maintenance task reveals reusable knowledge, add it to the narrowest reference file rather than expanding `SKILL.md`. Prefer concise rules, command patterns, gotchas, and links to primary documentation. Maintainer-specific defaults belong in `LOCAL.md`; `SKILL.md` and the `references/` should stay team-neutral.
