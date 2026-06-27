@@ -56,7 +56,7 @@ Read only the reference needed for the current task:
 - `references/tools.md`: gbp, pbuilder, sbuild, devscripts, uscan, quilt, pristine-tar, release helpers.
 - `references/qa.md`: lintian, autopkgtest, piuparts, reproducibility, build logs, dependency/installability checks.
 - `references/services.md`: tracker.debian.org, bugs.debian.org, salsa.debian.org, debusine, buildd, mentors.
-- `references/workflows.md`: concrete packaging workflows for bug fixes, new upstream releases, NMUs, transitions, and test/debug loops.
+- `references/workflows.md`: concrete packaging workflows for bug fixes, new upstream releases, NMUs, security updates, transitions, and test/debug loops.
 - `references/extensions.md`: additional Debian resources to consult or add to this skill over time.
 
 ## Local Validation Ladder
